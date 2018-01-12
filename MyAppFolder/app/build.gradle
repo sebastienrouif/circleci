@@ -1,8 +1,49 @@
+import org.gradle.api.internal.plugins.DefaultExtraPropertiesExtension
+
+def versionMajor = 0
+def versionMinor = 0
+def versionPatch = 1
+def versionBuild = buildNum
+
 apply plugin: 'com.android.application'
-
 apply plugin: 'kotlin-android'
-
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'io.fabric'
+
+def gitSha() {
+    def p = 'git rev-parse --short HEAD'.execute([], project.rootDir)
+    p.waitFor()
+    if (p.exitValue() != 0) {
+        throw new RuntimeException(p.errorStream.text)
+    }
+
+    return p.text.trim()
+}
+
+def gitTimestamp() {
+    def p = 'git log -n 1 --format=%at'.execute([], rootDir)
+    p.waitFor()
+    if (p.exitValue() != 0) {
+        throw new RuntimeException(p.errorStream.text)
+    }
+
+    return p.text.trim()
+}
+
+def setCrashlyticsParams(DefaultExtraPropertiesExtension extension) {
+    extension.betaDistributionReleaseNotes="branch : ${branch} | buildNum ${buildNum} | commit : ${gitSha()}"
+    extension.betaDistributionGroupAliases="android_testers"
+}
+
+static def renameArtifact(variant, defaultConfig) {
+    variant.outputs.all { output ->
+        def fullName = output.outputFile.name
+        def projectName = fullName.substring(0, fullName.indexOf('-'))
+
+        outputFileName = output.outputFile.name.replace(projectName, "${projectName}-${defaultConfig.versionName}")
+    }
+}
+
 
 android {
     compileSdkVersion 26
@@ -10,14 +51,30 @@ android {
         applicationId "org.rouif.sebastien.circleci"
         minSdkVersion 19
         targetSdkVersion 26
-        versionCode 1
-        versionName "1.0"
+
+        versionCode versionBuild
+        versionName "${versionMajor}.${versionMinor}.${versionPatch}.${versionBuild}"
+
+        buildConfigField 'String', 'GIT_SHA', "\"${gitSha()}\""
+        buildConfigField 'long', 'GIT_TIMESTAMP', "${gitTimestamp()}L"
+        buildConfigField 'boolean', 'IS_CI', "${isCi}"
+        resValue "string", "version_name", "v. ${versionName}"
+
+        setCrashlyticsParams(ext)
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+
+    applicationVariants.all { variant -> renameArtifact(variant, defaultConfig) }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+
+        debug {
+            versionNameSuffix "-dev"
+            applicationIdSuffix ".dev"
         }
     }
 }
@@ -30,4 +87,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    compile('com.crashlytics.sdk.android:crashlytics:2.8.0@aar') {
+        transitive = true;
+    }
 }

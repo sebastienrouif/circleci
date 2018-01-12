@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">CircleCi</string>
+    <string name="force_crash">Force Crash!</string>
 </resources>
