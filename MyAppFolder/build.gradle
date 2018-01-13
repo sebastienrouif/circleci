@@ -3,7 +3,6 @@
 buildscript {
     ext.isCi = System.getenv('CIRCLECI') ? System.getenv('CIRCLECI').toBoolean() : false
     ext.buildNum = System.getenv("CIRCLE_BUILD_NUM") ? System.getenv("CIRCLE_BUILD_NUM").toInteger() : 99999999
-    ext.branch = System.getenv("CIRCLE_BRANCH")
     project.logger.info("isCi: " + ext.isCi + " | buildNum: " + ext.buildNum)
 
     ext.kotlin_version = '1.2.10'
