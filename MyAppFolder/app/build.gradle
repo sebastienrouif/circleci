@@ -41,19 +41,21 @@ def gitTimestamp() {
 
 def setCrashlyticsParams(DefaultExtraPropertiesExtension extension) {
     def gitBranch = gitBranch()
+    def group
     extension.betaDistributionReleaseNotes="branch : ${gitBranch} | buildNum ${buildNum} | commit : ${gitSha()}"
     if ("master".equalsIgnoreCase(gitBranch)) {
-        extension.betaDistributionGroupAliases="release"
+        group = "release"
     } else if (gitBranch.startsWith("hotfix/") || gitBranch.startsWith("release/")) {
-        extension.betaDistributionGroupAliases="release-candidate"
+        group="release-candidate"
     } else if ("develop".equalsIgnoreCase(gitBranch)) {
-        extension.betaDistributionGroupAliases="nightly"
+        group="nightly"
     } else if (gitBranch.startsWith("feature/")) {
-        extension.betaDistributionGroupAliases="features"
+        group="features"
     } else {
         throw new RuntimeException("You are not using git flow")
     }
-    extension.betaDistributionGroupAliases="android_testers"
+    project.logger.info("distributing to group : " + group)
+    extension.betaDistributionGroupAliases=group
 }
 
 static def renameArtifact(variant, defaultConfig) {
@@ -108,7 +110,5 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
-    compile('com.crashlytics.sdk.android:crashlytics:2.8.0@aar') {
-        transitive = true;
-    }
+    api 'com.crashlytics.sdk.android:crashlytics:2.8.0@aar'
 }
