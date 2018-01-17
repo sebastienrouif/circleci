@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name">CircleCi</string>
     <string name="force_crash">Force Crash!</string>
+    <string name="button_verbose">Verbose</string>
+    <string name="button_debug">Debug</string>
+    <string name="button_info">Info</string>
+    <string name="button_warn">Warn</string>
+    <string name="button_error">Error</string>
+    <string name="button_assert">Assert</string>
+
 </resources>
