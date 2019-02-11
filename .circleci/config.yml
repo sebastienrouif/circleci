@@ -1,17 +1,16 @@
 version: 2
+config_android: &config_android
+  docker:
+    - image: circleci/android:api-28-alpha
+  working_directory: ~/project
+  environment:
+    JAVA_TOOL_OPTIONS: -Xmx1024m
+    GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Dkotlin.incremental=false
+    TERM: dumb
+
 jobs:
-  build:
-    working_directory: ~/code
-    docker:
-      - image: circleci/android:api-26-alpha
-    environment:
-      - _JAVA_OPTIONS: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
-
-      # Turn off Gradle Daemon
-      #https://circleci.com/docs/1.0/oom/#out-of-memory-errors-in-android-builds
-      - GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m -XX:+HeapDumpOnOutOfMemoryError" -Dorg.gradle.daemon=false -Dorg.gradle.parallel=false -Dorg.gradle.configureondemand=false'
-      - TERM: dumb
-
+  build_and_setup:
+    <<: *config_android
     steps:
       - checkout
       - run:
@@ -37,7 +36,7 @@ jobs:
           working_directory: MyAppFolder
       - run:
           name: build dev app
-          command: ./gradlew assembleDebug crashlyticsUploadDistributionDebug 
+          command: ./gradlew assembleDebug crashlyticsUploadDistributionDebug
           working_directory: MyAppFolder
       - run:
           name: build prod app
@@ -51,4 +50,10 @@ jobs:
           destination: reports
       - store_test_results:
           path: MyAppFolder/app/build/test-results
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build_and_setup
+
 
