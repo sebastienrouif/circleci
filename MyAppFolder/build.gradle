@@ -5,7 +5,7 @@ buildscript {
     ext.buildNum = System.getenv("CIRCLE_BUILD_NUM") ? System.getenv("CIRCLE_BUILD_NUM").toInteger() : 99999999
     project.logger.info("isCi: " + ext.isCi + " | buildNum: " + ext.buildNum)
 
-    ext.kotlin_version = '1.2.10'
+    ext.kotlin_version = '1.3.21'
 
     repositories {
         google()
@@ -13,7 +13,7 @@ buildscript {
         maven { url 'https://maven.fabric.io/public' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.1'
+        classpath 'com.android.tools.build:gradle:3.4.0-beta03'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'io.fabric.tools:gradle:1.+'
 

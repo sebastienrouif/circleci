@@ -17,6 +17,6 @@ class CrashlyticsTree : Timber.Tree() {
 
     override fun isLoggable(tag: String?, priority: Int): Boolean {
         return priority == Log.ERROR
-            || priority == Log.ASSERT
+                || priority == Log.ASSERT
     }
 }
